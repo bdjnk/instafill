@@ -1,6 +1,3 @@
-instafill
-=========
-
 A mod for Minetest which enables a player to create a solid cube of a given type of node by placing two nodes of that type at opposite corners of the desired cube. This also allows the creation of squares and lines of nodes.
 
 Current design choices I've made are as follows: The nodes only replace "air" nodes. While the two initial nodes must come from your inventory, the rest are magically generated.
