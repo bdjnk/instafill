@@ -37,10 +37,10 @@ end
 )
 
 minetest.register_on_dignode(function(pos, oldnode, digger)
-	if oldnode.name == pname then
-		if ppos == pos then
-			ppos = {} -- when we dig a node, remove it from instafill
-		end
+	if not boxmode then return end
+
+	if ppos.x == pos.x and ppos.y == pos.y and ppos.z == pos.z then
+		ppos = {} -- when we dig a node, remove it from instafill
 	end
 end
 )
@@ -50,6 +50,7 @@ minetest.register_chatcommand("box", {
 	description = "box: box mode switch",
 	func = function(name, param)
 		boxmode = not boxmode
+		ppos = {}
 		minetest.chat_send_player(name, "You have "..(boxmode and "entered" or "exited").." box mode");
 	end,
 })
