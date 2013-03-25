@@ -3,7 +3,7 @@ local ppos = {}
 local pname = ""
 
 minetest.register_on_placenode(function(pos, newnode, placer, oldnode, itemstack)
-	if not boxmode then return end -- make sure boxmode is on
+	if not boxmode then return end -- make sure box mode is on
 
 	-- new node type or ppos is empty (set by 'ppos = {}')
 	if ppos.x == nil or pname ~= newnode.name then
@@ -23,9 +23,14 @@ minetest.register_on_placenode(function(pos, newnode, placer, oldnode, itemstack
 			for ny = y1, y2 do
 				for nz = z1, z2 do
 					local npos = {x=nx, y=ny, z=nz}
-					--comment out the if for hungery mode (replaces all node types)
-					if minetest.env:get_node(npos).name == "air" then
-						minetest.env:add_node(npos, {name = pname})
+					-- remove the 'cname' lines for hungery mode (replaces all node types)
+					local cname = minetest.env:get_node(npos).name
+					if cname == "air" or cname == "default:water" then
+						-- remove the 'itemstack' lines for free filler nodes
+						itemstack:take_item(1)
+						if not itemstack:is_empty() then
+							minetest.env:add_node(npos, {name = pname})
+						end
 					end
 				end
 			end
