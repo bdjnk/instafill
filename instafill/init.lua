@@ -3,20 +3,19 @@ local ppos = {}
 local pname = ""
 
 minetest.register_on_placenode(function(pos, newnode, placer, oldnode, itemstack)
-  if not boxmode then return end
+	if not boxmode then return end -- make sure boxmode is on
+
+	-- new node type or ppos is empty (set by 'ppos = {}')
 	if ppos.x == nil or pname ~= newnode.name then
 		ppos = pos
 		pname = newnode.name
 	else
-		local dx = math.abs(ppos.x - pos.x)
-		local x1 = math.min(ppos.x, pos.x)
-		local x2 = math.max(ppos.x, pos.x)
+		local x1 = math.min(ppos.x, pos.x) -- smaller x
+		local x2 = math.max(ppos.x, pos.x) -- larger x
 
-		local dy = math.abs(ppos.y - pos.y)
 		local y1 = math.min(ppos.y, pos.y)
 		local y2 = math.max(ppos.y, pos.y)
 
-		local dz = math.abs(ppos.z - pos.z)
 		local z1 = math.min(ppos.z, pos.z)
 		local z2 = math.max(ppos.z, pos.z)
 
@@ -24,13 +23,15 @@ minetest.register_on_placenode(function(pos, newnode, placer, oldnode, itemstack
 			for ny = y1, y2 do
 				for nz = z1, z2 do
 					local npos = {x=nx, y=ny, z=nz}
+					--comment out the if for hungery mode (replaces all node types)
 					if minetest.env:get_node(npos).name == "air" then
 						minetest.env:add_node(npos, {name = pname})
 					end
 				end
 			end
 		end
-		ppos = {}
+		ppos = {} -- deliberate mode (dangerous)
+		--ppos = pos -- continuous mode (very dangerous)
 	end
 end
 )
@@ -38,7 +39,7 @@ end
 minetest.register_on_dignode(function(pos, oldnode, digger)
 	if oldnode.name == pname then
 		if ppos == pos then
-			ppos = {}
+			ppos = {} -- when we dig a node, remove it from instafill
 		end
 	end
 end
