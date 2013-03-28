@@ -25,16 +25,15 @@ build_box = function (pos, placer, itemstack)
 				local cname = minetest.env:get_node(npos).name
 				if cname == "air" or cname == "default:water" then -- skips both corners
 
-					-- replace the following 'if else' with an 'add_node' for free filler nodes
+					-- remove the 'itemstack' lines for free filler nodes
 					if not itemstack:is_empty() then
 						itemstack:take_item(1)
 						minetest.env:add_node(npos, {name = pname})
 
 					else -- itemstack:is_empty()
-						placer:set_wielded_item(itemstack)
+						placer:set_wielded_item(itemstack) -- update the inventory (remove empty stack)
 
 						if inv:contains_item("main", pname) then
-							placer:set_wielded_item(itemstack) -- update the inventory (remove empty stack)
 							itemstack:replace(inv:remove_item("main", {name=pname, count=itemstack:get_stack_max()}))
 							placer:set_wielded_item(itemstack) -- update the inventory (grab next stack)
 
@@ -65,10 +64,8 @@ minetest.register_on_placenode(function(pos, newnode, placer, oldnode, itemstack
 		pname = newnode.name
 	else
 		inv = placer:get_inventory()
-		itemstack = build_box(pos, placer, itemstack)
-
-		itemstack = inv:add_item("main", itemstack) -- return leftover blocks
-		placer:set_wielded_item(itemstack) -- update the inventory (is this necessary?)
+		itemstack = build_box(pos, placer, itemstack) -- build the cuboid
+		placer:set_wielded_item(itemstack) -- update the inventory (remove used blocks)
 
 		fpos = {} -- deliberate mode (dangerous)
 		--fpos = pos -- continuous mode (very dangerous)
