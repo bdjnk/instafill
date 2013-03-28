@@ -25,7 +25,7 @@ build_box = function (pos, placer, itemstack)
 				local cname = minetest.env:get_node(npos).name
 				if cname == "air" or cname == "default:water" then -- skips both corners
 
-					-- remove the 'itemstack' lines for free filler nodes
+					-- replace the if else below with "add_node" for free filler nodes
 					if not itemstack:is_empty() then
 						itemstack:take_item(1)
 						minetest.env:add_node(npos, {name = pname})
