@@ -3,6 +3,7 @@ local fpos = {} -- first (node's) position
 local pname = "" -- previous (node type's) name
 
 local inv = nil -- placer:get_inventory()
+local creative_mode = minetest.setting_getbool("creative_mode")
 
 build_box = function (pos, placer, itemstack)
 	local ppos = {} -- previous position
@@ -22,13 +23,16 @@ build_box = function (pos, placer, itemstack)
 				local npos = {x=nx, y=ny, z=nz} -- next position
 
 				-- remove the 'cname' lines for hungery mode (replaces all node types)
-				local cname = minetest.env:get_node(npos).name
+				local cname = minetest.get_node(npos).name
 				if cname == "air" or cname == "default:water" then -- skips both corners
 
+					if creative_mode then
+						minetest.add_node(npos, {name = pname})
+
 					-- replace the if else below with "add_node" for free filler nodes
-					if not itemstack:is_empty() then
+					elseif not itemstack:is_empty() then
 						itemstack:take_item(1)
-						minetest.env:add_node(npos, {name = pname})
+						minetest.add_node(npos, {name = pname})
 
 					else -- itemstack:is_empty()
 						placer:set_wielded_item(itemstack) -- update the inventory (remove empty stack)
@@ -39,11 +43,11 @@ build_box = function (pos, placer, itemstack)
 
 							if not itemstack:is_empty() then
 								itemstack:take_item(1)
-								minetest.env:add_node(npos, {name = pname})
+								minetest.add_node(npos, {name = pname})
 							end
 
 						else
-							minetest.env:remove_node(ppos)
+							minetest.remove_node(ppos)
 							return itemstack -- all out of blocks to place
 						end
 					end
