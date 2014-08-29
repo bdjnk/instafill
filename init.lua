@@ -24,7 +24,7 @@ build_box = function (pos, placer, itemstack)
 
 				-- remove the 'cname' lines for hungery mode (replaces all node types)
 				local cname = minetest.get_node(npos).name
-				if cname == "air" or cname == "default:water" then -- skips both corners
+				if cname == "air" or minetest.get_node_group(cname, "group:water") then -- skips both corners
 
 					if creative_mode then
 						minetest.add_node(npos, {name = pname})
@@ -86,12 +86,12 @@ minetest.register_on_dignode(function(pos, oldnode, digger)
 end
 )
 
-minetest.register_chatcommand("box", {
+minetest.register_chatcommand("ifill", {
 	params = "",
-	description = "box: box mode switch",
+	description = "ifill: instafill mode switch",
 	func = function(name, param)
 		boxmode = not boxmode
 		fpos = {}
-		minetest.chat_send_player(name, "You have "..(boxmode and "entered" or "exited").." box mode");
+		minetest.chat_send_player(name, "You have "..(boxmode and "entered" or "exited").." instafill mode");
 	end,
 })
