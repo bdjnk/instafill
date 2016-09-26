@@ -2,7 +2,7 @@ A mod for Minetest which allows players to create a solid cube of a given type o
 
 Instafill is toggled by means of the "/f" command. Chat messages will let you know what state you're in.
 
-= Specific Functionality
+## Specific Functionality
 
 The cube nodes only replace "air" and "default:water" nodes. All other nodes are worked around; they will be encased, not replaced.
 
