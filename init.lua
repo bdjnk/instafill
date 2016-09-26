@@ -1,11 +1,11 @@
-local boxmode = false
+local fill_mode = false
 local fpos = {} -- first (node's) position
 local pname = "" -- previous (node type's) name
 
 local inv = nil -- placer:get_inventory()
 local creative_mode = minetest.setting_getbool("creative_mode")
 
-build_box = function (pos, placer, itemstack)
+local fill = function (pos, placer, itemstack)
 	local ppos = {} -- previous position
 
 	local x1 = math.min(fpos.x, pos.x) -- smaller x
@@ -24,7 +24,7 @@ build_box = function (pos, placer, itemstack)
 
 				-- remove the 'cname' lines for hungery mode (replaces all node types)
 				local cname = minetest.get_node(npos).name
-				if cname == "air" or minetest.get_node_group(cname, "group:water") then -- skips both corners
+				if cname == "air" or cname == "default:water" then -- skips both corners
 
 					if creative_mode then
 						minetest.add_node(npos, {name = pname})
@@ -60,38 +60,53 @@ build_box = function (pos, placer, itemstack)
 end
 
 minetest.register_on_placenode(function(pos, newnode, placer, oldnode, itemstack)
-	if not boxmode then return end -- make sure box mode is on
+	if not fill_mode then return end -- make sure box mode is on
 
 	-- new node type or fpos is empty (set by 'fpos = {}')
 	if fpos.x == nil or pname ~= newnode.name then
 		fpos = pos
 		pname = newnode.name
+		minetest.chat_send_player(placer:get_player_name(), "Place a second corner to fill the cuboid");
 	else
 		inv = placer:get_inventory()
-		itemstack = build_box(pos, placer, itemstack) -- build the cuboid
+		itemstack = fill(pos, placer, itemstack) -- fill the cuboid
 		placer:set_wielded_item(itemstack) -- update the inventory (remove used blocks)
+		
+		-- exit fill mode on any placement (safe)
+		fpos = {}
+		fill_mode = false;
+		minetest.chat_send_player(placer:get_player_name(), "You are no longer in fill mode");
 
-		fpos = {} -- deliberate mode (dangerous)
-		--fpos = pos -- continuous mode (very dangerous)
+		--fpos = {} -- wait for a new first corner (dangerous)
+		--fpos = pos -- make the second corner the next cuboid's first corner (very dangerous)
 	end
 end
 )
 
 minetest.register_on_dignode(function(pos, oldnode, digger)
-	if not boxmode then return end
+	if not fill_mode then return end
 
+	-- exit fill mode on any dig (safe)
+	fpos = {}
+	fill_mode = false;
+	minetest.chat_send_player(digger:get_player_name(), "You are no longer in fill mode");
+	
+	-- allow digging while in fill mode (dangerous)
+	--[[
 	if fpos.x == pos.x and fpos.y == pos.y and fpos.z == pos.z then
 		fpos = {} -- when we dig a node, remove it from instafill
+		minetest.chat_send_player(digger:get_player_name(), "First corner removed, fill mode reset");
 	end
+	]]
 end
 )
 
-minetest.register_chatcommand("ifill", {
+minetest.register_chatcommand("f", {
 	params = "",
-	description = "ifill: instafill mode switch",
+	description = "fill: fill mode switch",
 	func = function(name, param)
-		boxmode = not boxmode
+		fill_mode = not fill_mode
 		fpos = {}
-		minetest.chat_send_player(name, "You have "..(boxmode and "entered" or "exited").." instafill mode");
+		minetest.chat_send_player(name, "You are "..(fill_mode and "now" or "no longer").." in fill mode");
 	end,
 })
